@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Run the lint
+npm run lint:preCommit
+RESULT=$?
+if [ $RESULT = 0 ]  
+	then  
+		exit 0 # commit will execute
+	else  
+		echo "You are trying to commit with eslint warnings. This is not allowed"
+		exit 1 # commit will not execute
+fi

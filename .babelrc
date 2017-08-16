@@ -1,0 +1,22 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [
+            "last 2 versions",
+            "safari >= 7",
+            "ie >= 11",
+            "Edge >= 14",
+            "Chrome >= 59",
+            "Firefox > 52"
+          ]
+        }
+      }
+    ],
+    "stage-1",
+    "react"
+  ],
+  "plugins": ["transform-object-rest-spread"]
+}

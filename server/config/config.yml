@@ -1,0 +1,7 @@
+log:
+    logToConsole: true # log to file only
+    logsDir: '/opt/IBM/logs' # directory where log file should be written
+    logLevel: 'debug'
+    maxLogSize: 5 # in MB
+    maxLogFiles: 10 # no of log files to keep after roll over
+

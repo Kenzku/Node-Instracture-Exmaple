@@ -1,0 +1,184 @@
+#!/usr/bin/env node
+/**
+ * Created by Huang, Fuguo (a.k.a Ken) on 15.08.2017
+ */
+
+/**
+ * Module dependencies.
+ */
+let cluster = require('cluster');
+let debug = require('debug')('FibonacciAsync:server');
+let http = require('http');
+let defaultPort = '3000';
+let defaultIsCluster = 'true';
+
+let port = defaultPort;
+let workTypes = ['type-1', 'type-2', 'type-3', 'type-4'];
+/*shall added offloading for micro-services etc*/
+let currentWorkerTypesMaps = new Map();
+
+function getArg(args = [], filter = '', defaultValue = '') {
+  if (filter === '') {
+    return null;
+  }
+  let result = defaultValue;
+  let lengthOfFilter = filter.length;
+  let isResultInArg = args.filter(v => v.substring(0, lengthOfFilter) === filter);
+  if (!!isResultInArg && !!isResultInArg[0]) {
+    result = isResultInArg[0].split('=');
+    result = result.length === 2 ? result[1] : defaultValue;
+  }
+  return result;
+}
+
+function startApp() {
+  // Workers share the TCP connection in this server
+
+  let app = require('../app');
+  const path = require('path');
+
+  process.env.SHARED_CONFIG_PATH = path.join(__dirname + `/../../shared_config/${process.env.NODE_ENV}`);
+
+  /**
+   * Get port from environment and store in Express.
+   */
+  port = normalizePort(getArg(process.argv, 'port=', defaultPort) || defaultPort);
+  app.set('port', port);
+
+  /**
+   * Create HTTP server.
+   */
+  let server = http.createServer(app);
+
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+  // inject websocket service
+  global.WebSocketService = require(__dirname + '/../ApiService/Websocket/WebSocketService')(server);
+
+  /**
+   * Event listener for HTTP server "listening" event.
+   */
+
+  function onListening() {
+    let addr = server.address();
+    let bind = typeof addr === 'string'
+      ? 'pipe ' + addr
+      : 'port ' + addr.port;
+    debug('Listening on ' + bind);
+  }
+}
+
+function spawnWorker(index = 0) {
+  let worker = cluster.fork();
+  let workType = workTypes[index % workTypes.length];
+
+  currentWorkerTypesMaps.set(worker.id, workType);
+  return worker;
+}
+
+function reSpawnWorker(workerId) {
+  if (!workerId) {
+    return false;
+  }
+  let workType = currentWorkerTypesMaps.get(workerId);
+  currentWorkerTypesMaps.delete(workerId);
+
+  let worker = cluster.fork();
+
+  currentWorkerTypesMaps.set(worker.id, workType);
+  return worker;
+}
+
+if (cluster.isMaster) {
+  let isClusterMode = getArg(process.argv, 'cluster=', defaultIsCluster) === 'true'; // convert from string to bool
+  if (isClusterMode) {
+    let numWorkers = require('os').cpus().length;
+
+    console.log('Master cluster setting up ' + numWorkers + ' workers...');
+
+    for (let i = 0; i < numWorkers; i++) {
+      spawnWorker(i);
+    }
+
+    cluster.on('online', worker => {
+      console.log('Worker ' + worker.process.pid + ' is online', 'doing:', currentWorkerTypesMaps.get(worker.id));
+    });
+
+    /*Error handling*/
+    cluster.on('exit', (worker, code, signal) => {
+      console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+
+      let isSuccess = reSpawnWorker(worker.id);
+      console.log('Starting a new worker', 'success?', !!isSuccess);
+    });
+
+    // set up listener of file changes for restarting workers
+    // fs.readdir('.', (err, files) => {
+    //     files.forEach(file => {
+    //         fs.watch(file, () => {
+    //             reStartWorker(isForce);
+    //         });
+    //     });
+    // });
+
+    console.log('Work types mapping', currentWorkerTypesMaps);
+  } else {
+    console.log('RUNNING ON SINGLE PROCESS MODE');
+    startApp();
+  }
+} else {
+  startApp();
+}
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(value) {
+  let port = parseInt(value, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return value;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  let bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}

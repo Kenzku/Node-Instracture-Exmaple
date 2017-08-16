@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Modified by Huang Fuguo (a.k.a Ken) on 3.Aug.2017
+
+echo "################### Will use Node.JS from ${NODE_PATH}"
+echo "################### Start to unzip Node.JS"
+
+tar -xf node-v8.3.0-linux-x64.tar.xz
+
+echo "################### Done"
+
+echo "################### Setup Path Environment"
+
+CURRENT_DIR=$(pwd)
+NODE_DIR=/node-v8.3.0-linux-x64/bin
+NODE_PATH=$CURRENT_DIR$NODE_DIR
+
+echo "################### CURRENT_DIR: ${CURRENT_DIR}"
+echo "################### NODE_DIR: ${NODE_DIR}"
+echo "################### NODE_PATH: ${NODE_PATH}"
+
+export PATH=$NODE_PATH:$PATH
+
+echo "################### About to stat node server in production mode"
+
+npm run start:prod
