@@ -1,6 +1,3 @@
-/**
- * Created by harshini on 27/10/16.
- */
 const path = require('path');
 const sep = path.sep;
 const logger = require(__dirname + '/CustomisedLogger'); // higher level log is not ready

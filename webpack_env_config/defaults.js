@@ -28,7 +28,7 @@ const styles = path.resolve(clientSourcePath,'styles');
 const images = path.resolve(clientSourcePath,'images');
 const client_config = path.resolve(clientConfigPath, process.env.REACT_WEBPACK_ENV);
 const shared_config = path.resolve(sharedConfigPath, process.env.REACT_WEBPACK_ENV);
-const ioa_service = path.resolve(clientSourcePath,'ioa_services');
+const api_service = path.resolve(clientSourcePath,'api_services');
 const src_root = path.resolve(clientSourcePath);
 
 console.log(`--------------------  Environment is ${process.env.REACT_WEBPACK_ENV} --------------------
@@ -37,7 +37,7 @@ console.log(`--------------------  Environment is ${process.env.REACT_WEBPACK_EN
               shared config path: ${shared_config}
               client root path: ${clientRoot}
               client config path: ${client_config}
-              client ioa service path: ${ioa_service}`);
+              client service path: ${api_service}`);
 
 /*NodeJS uses commonJS as export/import*/
 module.exports.rules = [
@@ -133,7 +133,7 @@ module.exports.defaultSettings = {
       images,
       client_config,
       shared_config,
-      ioa_service,
+      api_service,
       src_root
     }
   }

@@ -4,14 +4,14 @@
 function RemoteProcedureCallWebSocketService (wsServer, shared_config) {
   const RemoteProcedureCallServiceWrapper = require('../RemoteProcedureCall/RemoteProcedureCallWrapper');
 
-  const rpcWsService = wsServer.of('/ioa/rpc');
+  const rpcWsService = wsServer.of('/rpc');
 
   const rpcService = new RemoteProcedureCallServiceWrapper(rpcWsService);
 
   rpcWsService.on('connection', (socket) => {
 
     socket.on(shared_config.websocket['rpc:joined'], () => {
-      console.log('ioa remote procedure call service is connected');
+      console.log('remote procedure call service is connected');
     });
 
     socket.on(shared_config.websocket['rpc:get-latest-config'], () => {
@@ -30,7 +30,7 @@ function RemoteProcedureCallWebSocketService (wsServer, shared_config) {
     });
 
     socket.on('disconnect', () => {
-      console.log('ioa remote procedure call service is disconnected');
+      console.log('remote procedure call service is disconnected');
     });
   }); // end of 'on'
 
