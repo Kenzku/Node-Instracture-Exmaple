@@ -8,7 +8,7 @@ function WebSocketService(server) {
   /*ioa services web socket services*/
 
   // Remote Procedure Call Service
-  const rpcHandler = require('./services/RemoteProcedureCallWebSocketService')(wsServer, shared_config);
+  const rpcHandler = require('./Services/RemoteProcedureCallWebSocketService')(wsServer, shared_config);
 
   return {
     rpcHandler
