@@ -43,9 +43,6 @@ app.use(global.configuredSession);
  */
 app.use(SecurityHeader);
 
-/*close the download route, except for ioa mode*/
-// const latestConfig = config.getLatestConfig();
-
 process.env.NODE_ENV = env;
 
 if (process.env.NODE_ENV !== 'production') {

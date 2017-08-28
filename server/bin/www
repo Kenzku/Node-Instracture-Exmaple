@@ -7,7 +7,7 @@
  * Module dependencies.
  */
 let cluster = require('cluster');
-let debug = require('debug')('FibonacciAsync:server');
+let debug = require('debug')('Node-UI-Infrastructure:server');
 let http = require('http');
 let defaultPort = '3000';
 let defaultIsCluster = 'true';
